@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task-4.1.xsd
+	    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+	    
+	
+		 <!-- 配置Annotation的支持操作 -->
+		<context:annotation-config />  
+		
+		<context:component-scan base-package="cn.li" />
+	         
+	  <!-- 读取资源文件到applicationContext.xml中 -->
+	  <context:property-placeholder location="classpath:database.properties"/>
+	  <!-- 配置数据源 -->
+	  <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	          <property name="driverClass" value="${db.driverClass}"/>
+	          <property name="jdbcUrl" value="${db.jdbcUrl}"/>
+	          <property name="user" value="${db.user}"/>
+	          <property name="password" value="${db.password}"/>
+	          <!-- 连接池最大连接数量 -->
+	           <property name="maxPoolSize" value="${db.maxPoolSize}"/>
+	          <!-- 连接池已满最大等待时间 -->
+	          <property name="maxIdleTime" value="${db.maxIdleTime}"/>
+	          <!-- 没有人连接时 连接池保持连接数量 -->
+	          <property name="minPoolSize" value="${db.minPoolSize}"/>
+	          <!-- 初始化连接池大小 -->
+	          <property name="initialPoolSize" value="${db.initialPoolSize}"/>
+	          
+	  </bean>
+	  
+		 <!-- 配置Hibernate的相关开发环境，SessionFactory可以打开Session -->
+		<bean id="sessionFactory"
+			class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+			<property name="configLocation" value="classpath:hibernate.cfg.xml"/>
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+		
+	    <!-- 配置事务处理，所有的事务都采用AOP的方式，本处只是声明SessionFactory要进行事务控制 -->
+		<bean id="transactionManager"
+			class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+			<property name="sessionFactory" ref="sessionFactory" />
+		</bean>
+		<!-- 进入到了事务的配置声明 -->
+		<tx:annotation-driven transaction-manager="transactionManager" />
+		<tx:advice id="txAdvice" transaction-manager="transactionManager">
+			<!-- 定义一切与服务层有关的控制方法名称，只要是使用了特定的名称那么就会自动处理事务 -->
+			<tx:attributes>
+				<tx:method name="insert*" propagation="REQUIRED"/>
+				<tx:method name="update*" propagation="REQUIRED"/>
+				<tx:method name="delete*" propagation="REQUIRED"/>
+				<tx:method name="add*" propagation="REQUIRED"/>
+				<tx:method name="edit*" propagation="REQUIRED"/>
+				<tx:method name="change*" propagation="REQUIRED"/>
+				<tx:method name="remove*" propagation="REQUIRED"/>
+				<tx:method name="login*" propagation="REQUIRED"/>
+				<tx:method name="get*" propagation="REQUIRED" read-only="true"/>
+				<tx:method name="load*" propagation="REQUIRED" read-only="true"/>
+				<tx:method name="list*" propagation="REQUIRED" read-only="true"/>
+				<tx:method name="check*" propagation="REQUIRED" read-only="true"/>
+				<tx:method name="*" propagation="REQUIRED" read-only="true"/>
+			</tx:attributes>
+		</tx:advice>
+		<!-- 定义事务的处理切入点 --> 
+		<aop:config expose-proxy="true">
+			<aop:pointcut expression="execution(* cn.li.service..*.*(..))" id="pointcut"/>
+			<aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>
+		</aop:config>
+		
+		<!--  hibernate操作模板
+		<bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+			<property name="sessionFactory" ref="sessionFactory"/>
+		</bean> -->
+</beans>

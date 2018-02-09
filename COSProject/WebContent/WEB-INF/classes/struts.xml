@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+ 
+<struts>
+        <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+        <package name="root" namespace="/" extends="struts-default">
+               <!-- 配置自定义拦截器 -->
+               <interceptors>
+                        <interceptor name="validate" class="cn.li.util.interceptor.InvalidateInterceptor"></interceptor>
+                        <interceptor name="verifycode" class="cn.li.action.interception.VerifyCodeInterceptor"></interceptor>
+                        <interceptor name="encoding" class="cn.li.action.interception.EncodingInterceptor"></interceptor>
+                        <!-- 登录检查拦截器 -->
+                        <interceptor name="pages" class="cn.li.action.interception.PagesInterceptor"></interceptor>
+                        <interceptor name="admin" class="cn.li.action.interception.AdminInterceptor"></interceptor>
+                        <interceptor name="manager" class="cn.li.action.interception.ManagerInterceptor"></interceptor>
+                        <interceptor name="emp" class="cn.li.action.interception.EmpInterceptor"></interceptor>
+                        <!--公共拦截器 栈-->
+                        <interceptor-stack name="loginverifyStack">
+                                      <interceptor-ref name="encoding"></interceptor-ref>
+                                      <interceptor-ref name="verifycode"></interceptor-ref>
+                                      <interceptor-ref name="validate"></interceptor-ref>
+                                      <interceptor-ref name="defaultStack"></interceptor-ref>
+                        </interceptor-stack>
+                        <!-- 管理员拦截器栈 -->
+                         <interceptor-stack name="adminStack">
+                                      <interceptor-ref name="encoding"></interceptor-ref>
+                                      <interceptor-ref name="pages"></interceptor-ref>
+                                      <interceptor-ref name="admin"></interceptor-ref>
+                                      <interceptor-ref name="validate"></interceptor-ref>
+                                        <!-- 文件上传限制拦截器 -->
+				                       <interceptor-ref name="fileUpload">
+				                                    <!-- 允许上传大小 -->
+				                                    <param name="maximumSize">2097152</param>
+				                                    <!-- 允许上传类型 -->
+				                                    <param name="allowedTypes">image/jpeg,image/png,image/bmp,image/jpg</param>  
+				                       </interceptor-ref>
+                                      <interceptor-ref name="defaultStack"></interceptor-ref>
+                        </interceptor-stack>
+                        <!-- 经理拦截器 栈-->
+                         <interceptor-stack name="managerStack">
+                                      <interceptor-ref name="encoding"></interceptor-ref>
+                                      <interceptor-ref name="pages"></interceptor-ref>
+                                      <interceptor-ref name="manager"></interceptor-ref>
+                                      <interceptor-ref name="validate"></interceptor-ref>
+                                        <!-- 文件上传限制拦截器 -->
+				                       <interceptor-ref name="fileUpload">
+				                                    <!-- 允许上传大小 -->
+				                                    <param name="maximumSize">2097152</param>
+				                                    <!-- 允许上传类型 -->
+				                                    <param name="allowedTypes">image/jpeg,image/png,image/bmp,image/jpg</param>  
+				                       </interceptor-ref>
+                                      <interceptor-ref name="defaultStack"></interceptor-ref>
+                        </interceptor-stack>
+                        <!-- 雇员员拦截器 栈-->
+                         <interceptor-stack name="empStack">
+                                      <interceptor-ref name="encoding"></interceptor-ref>
+                                      <interceptor-ref name="pages"></interceptor-ref>
+                                      <interceptor-ref name="emp"></interceptor-ref>
+                                      <interceptor-ref name="validate"></interceptor-ref>
+                                        <!-- 文件上传限制拦截器 -->
+				                       <interceptor-ref name="fileUpload">
+				                                    <!-- 允许上传大小 -->
+				                                    <param name="maximumSize">2097152</param>
+				                                    <!-- 允许上传类型 -->
+				                                    <param name="allowedTypes">image/jpeg,image/png,image/bmp,image/jpg</param>  
+				                       </interceptor-ref>
+                                      <interceptor-ref name="defaultStack"></interceptor-ref>
+                        </interceptor-stack>
+                        
+               </interceptors>
+               
+               <!-- 全局跳转路径 -->
+               <global-results>
+                             <result name="error.page">/errors.jsp</result>
+                             <result name="forward.page">/forward.jsp</result>
+               </global-results>
+               
+               
+       </package>
+
+</struts>
